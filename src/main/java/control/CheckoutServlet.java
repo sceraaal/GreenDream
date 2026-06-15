@@ -1,6 +1,7 @@
 package control;
 
 import java.io.IOException;
+import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -8,48 +9,55 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import model.Cart;
-import model.User;
-
 @WebServlet("/Checkout")
 public class CheckoutServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        
-        HttpSession session = request.getSession();
-        User user = (User) session.getAttribute("user");
-        Cart cart = (Cart) session.getAttribute("cart");
-
-        // Controllo se l'utente è loggato e se il carrello non è vuoto
-        if (user == null) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
-            return;
-        }
-
-        if (cart == null || cart.getItems().isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/cart.jsp");
-            return;
-        }
-
-        // Reindirizziamo alla pagina di conferma ordine/pagamento
-        request.getRequestDispatcher("/checkout.jsp").forward(request, response);
-    }
-
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        HttpSession session = request.getSession();
-        Cart cart = (Cart) session.getAttribute("cart");
-
-        if (cart != null) {
-            // Qui andrebbe la logica per salvare l'ordine nel DB tramite un OrderDAO
-            // Per ora svuotiamo il carrello dopo l'acquisto
-            cart.clear();
-            request.setAttribute("successMessage", "Acquisto completato con successo!");
+        HttpSession session = request.getSession(false);
+        
+        // Controllo di sicurezza: se non c'è la sessione, rimandiamo alla home
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/index.jsp");
+            return;
         }
 
-        request.getRequestDispatcher("/orderSuccess.jsp").forward(request, response);
+        @SuppressWarnings("unchecked")
+        Map<String, Integer> cart = (Map<String, Integer>) session.getAttribute("cart");
+
+        // Verifichiamo se il carrello esiste ed ha almeno un prodotto
+        if (cart == null || cart.isEmpty()) {
+            request.setAttribute("errorMessage", "Il tuo carrello è vuoto. Impossibile completare l'ordine.");
+            request.getRequestDispatcher("/cart.jsp").forward(request, response);
+            return;
+        }
+
+        try {
+            /* * NOTA PER DOPO: Qui si collegherà la logica degli ordini di Nazar
+             * OrderDAO orderDAO = new OrderDAO();
+             * orderDAO.doSave(utente, cart);
+             */
+
+            // L'ordine è andato a buon fine: svuotiamo il carrello della sessione
+            session.removeAttribute("cart");
+
+            // Impostiamo un messaggio di successo per l'utente
+            session.setAttribute("successMessage", "Grazie! Il tuo ordine è stato ricevuto ed è in fase di elaborazione.");
+            
+            // Reindirizziamo alla pagina di conferma dell'ordine
+            response.sendRedirect(request.getContextPath() + "/orderConfirmation.jsp");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // Blocco di sicurezza: il checkout si fa solo inviando il form in POST
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        response.sendRedirect(request.getContextPath() + "/cart.jsp");
     }
 }
