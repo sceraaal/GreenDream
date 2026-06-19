@@ -1,8 +1,8 @@
 package control;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import dao.ProductDAO;
 import model.Product;
 
+// Mappiamo la servlet per la ricerca dinamica
 @WebServlet("/SearchSuggestions")
 public class SearchSuggestionsServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -21,38 +22,37 @@ public class SearchSuggestionsServlet extends HttpServlet {
         
         String query = request.getParameter("q");
         
+        // Impostiamo la risposta in formato JSON
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        if (query == null || query.trim().isEmpty()) {
-            response.getWriter().write("[]");
-            return;
-        }
+        StringBuilder jsonResponse = new StringBuilder();
+        jsonResponse.append("[");
 
-        try {
-            ProductDAO productDAO = new ProductDAO();
-            List<Product> allProducts = productDAO.findAll();
-            
-            // Filtriamo i prodotti che contengono la query nel nome (case-insensitive)
-            List<String> suggestions = allProducts.stream()
-                .map(Product::getName)
-                .filter(name -> name.toLowerCase().contains(query.toLowerCase()))
-                .limit(5)
-                .collect(Collectors.toList());
-
-            // Costruiamo manualmente un piccolo array JSON per semplicità
-            StringBuilder json = new StringBuilder("[");
-            for (int i = 0; i < suggestions.size(); i++) {
-                json.append("\"").append(suggestions.get(i)).append("\"");
-                if (i < suggestions.size() - 1) json.append(",");
+        if (query != null && query.trim().length() >= 2) {
+            try {
+                ProductDAO productDAO = new ProductDAO();
+                List<Product> products = productDAO.searchByName(query.trim());
+                
+                for (Product p : products) {
+                    jsonResponse.append("{")
+                                .append("\"id\":").append(p.getId()).append(",")
+                                .append("\"name\":\"").append(p.getName().replace("\"", "\\\"")).append("\"")
+                                .append("},");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-            json.append("]");
-            
-            response.getWriter().write(json.toString());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.getWriter().write("[]");
         }
+
+        // Rimuoviamo l'ultima virgola di troppo se la stringa non è vuota
+        if (jsonResponse.charAt(jsonResponse.length() - 1) == ',') {
+            jsonResponse.deleteCharAt(jsonResponse.length() - 1);
+        }
+        
+        jsonResponse.append("]");
+
+        // Spediamo il JSON indietro al client JavaScript
+        response.getWriter().write(jsonResponse.toString());
     }
 }

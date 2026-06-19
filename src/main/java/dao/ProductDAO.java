@@ -117,4 +117,34 @@ public class ProductDAO
         }
         return null;
     }
+
+    public List<Product> searchByName(String name) throws SQLException 
+    {
+        List<Product> products = new ArrayList<>();
+        String query = "SELECT * FROM products WHERE LOWER(name) LIKE ?";
+        
+        try (Connection connection = DriverManagerConnectionPool.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) 
+        {
+            statement.setString(1, "%" + name.toLowerCase() + "%");
+            
+            try (ResultSet resultSet = statement.executeQuery()) 
+            {
+                while (resultSet.next()) 
+                {
+                    Product product = new Product();
+                    product.setId(resultSet.getInt("id"));
+                    product.setName(resultSet.getString("name"));
+                    product.setDescription(resultSet.getString("description"));
+                    product.setPrice(resultSet.getDouble("price"));
+                    product.setIva(resultSet.getInt("iva"));
+                    product.setQuantity(resultSet.getInt("quantity"));
+                    product.setImage(resultSet.getString("image"));
+                    
+                    products.add(product);
+                }
+            }
+        }
+        return products;
+    }
 }

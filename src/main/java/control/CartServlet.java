@@ -18,8 +18,19 @@ public class CartServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    private void processRequest(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
         
         HttpSession session = request.getSession(true);
+        
         Cart cart = (Cart) session.getAttribute("cart");
         if (cart == null) {
             cart = new Cart();
@@ -32,27 +43,34 @@ public class CartServlet extends HttpServlet {
         try {
             ProductDAO productDAO = new ProductDAO();
 
-            if (action != null && idStr != null) {
+            if (action == null || action.equals("view")) {
+                request.getRequestDispatcher("/cart.jsp").forward(request, response);
+                return;
+            }
+
+            if (idStr != null && !idStr.trim().isEmpty()) {
                 int id = Integer.parseInt(idStr);
                 Product product = productDAO.findById(id);
 
                 if (product != null) {
                     if (action.equals("add")) {
                         cart.addProduct(product);
+                        
+                    } else if (action.equals("update")) {
+                        int quantity = Integer.parseInt(request.getParameter("quantity"));
+                        cart.updateProductQuantity(product, quantity);
+                        
                     } else if (action.equals("remove")) {
                         cart.removeProduct(product);
                     }
                 }
             }
+
+            response.sendRedirect(request.getContextPath() + "/cart.jsp");
+
         } catch (Exception e) {
             e.printStackTrace();
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
-
-        request.getRequestDispatcher("/cart.jsp").forward(request, response);
-    }
-
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        doGet(request, response);
     }
 }

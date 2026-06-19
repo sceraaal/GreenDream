@@ -64,6 +64,29 @@ public class Cart implements Serializable
         return total;
     }
 
+    public void updateProductQuantity(Product product, int quantity) 
+    {
+        for (CartItem item : this.items) 
+        {
+            if (item.getProduct().getId() == product.getId()) 
+            {
+                if (quantity > 0) 
+                {
+                    item.setQuantity(quantity);
+                } 
+                else 
+                {
+                    this.items.remove(item);
+                }
+                return;
+            }
+        }
+        if (quantity > 0) 
+        {
+            this.items.add(new CartItem(product, quantity));
+        }
+    }
+
     public void clear() 
     {
         this.items.clear();

@@ -52,7 +52,7 @@
     <div class="container">
         <h1>Errore 500</h1>
         <p>Si è verificato un errore interno sul server. Stiamo già lavorando per risolvere il problema.</p>
-        <a href="${pageContext.request.contextPath}/index.jsp" class="btn-home">Torna alla Home</a>
+        <a href="<%= request.getContextPath() %>/index.jsp" class="btn-home">Torna alla Home</a>
     </div>
 </body>
 </html>
