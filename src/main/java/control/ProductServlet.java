@@ -34,7 +34,7 @@ public class ProductServlet extends HttpServlet {
             if (action == null || action.equals("list")) {
                 // 1. VISUALIZZAZIONE CATALOGO COMPLETO
                 request.setAttribute("products", productDAO.findAll());
-                request.getRequestDispatcher("/catalog.jsp").forward(request, response);
+                request.getRequestDispatcher("/products.jsp").forward(request, response);
                 
             } else if (action.equals("detail")) {
                 // 2. VISUALIZZAZIONE DETTAGLIO PRODOTTO
@@ -43,7 +43,7 @@ public class ProductServlet extends HttpServlet {
                     int id = Integer.parseInt(idStr);
                     request.setAttribute("product", productDAO.findById(id));
                 }
-                request.getRequestDispatcher("/productDetail.jsp").forward(request, response);
+                request.getRequestDispatcher("/productDetails.jsp").forward(request, response);
                 
             } else if (action.equals("insert")) {
                 // 3. INSERIMENTO NUOVO PRODOTTO (Solo Admin)
