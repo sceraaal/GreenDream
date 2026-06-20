@@ -53,5 +53,3 @@ document.getElementById('modal-confirm-btn').addEventListener('click', () => {
     closeModal();
 });
 </script>
-</body>
-</html>
