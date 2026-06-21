@@ -5,7 +5,7 @@ import java.io.Serializable;
 public class Product implements Serializable 
 {
     private static final long serialVersionUID = 1L;
-    
+
     private int id;
     private String name;
     private String description;
@@ -13,8 +13,9 @@ public class Product implements Serializable
     private int iva;
     private int quantity;
     private String image;
+    private String category;
 
-    public Product() 
+    public Product()
     {
     }
 
@@ -83,8 +84,18 @@ public class Product implements Serializable
         return this.image;
     }
 
-    public void setImage(String image) 
+    public void setImage(String image)
     {
         this.image = image;
+    }
+
+    public String getCategory()
+    {
+        return this.category;
+    }
+
+    public void setCategory(String category)
+    {
+        this.category = category;
     }
 }

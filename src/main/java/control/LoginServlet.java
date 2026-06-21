@@ -8,26 +8,22 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-// Mappiamo la servlet in modo che risponda all'URL /Login
 @WebServlet("/Login")
 public class LoginServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    // Gestiamo la richiesta in POST (invio del form di login)
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        
+
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
-        // Controllo di sicurezza base sui campi vuoti
         if (email == null || password == null || email.isEmpty() || password.isEmpty()) {
             request.setAttribute("errorMessage", "Email e password sono obbligatorie.");
             request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;
         }
 
-        // Cifriamo la password ricevuta dal form per il futuro confronto nel database
         String hashedPassword = PasswordUtils.hashPassword(password);
 
         try {
@@ -35,21 +31,22 @@ public class LoginServlet extends HttpServlet {
             model.User user = userDAO.authenticate(email, hashedPassword);
 
             if (user != null) {
-                // Login corretto: creiamo o recuperiamo la sessione
+
                 HttpSession session = request.getSession(true);
-                session.setAttribute("user", user); // Salva l'oggetto utente intero
+                session.setAttribute("user", user); 
 
                 boolean isAdmin = "admin".equalsIgnoreCase(user.getRole());
                 session.setAttribute("isAdmin", isAdmin);
 
-                // Reindirizzamento in base al ruolo
+                session.setAttribute("successMessage", "Bentornato, " + user.getFirstName() + "! Buon shopping su PetHouse.");
+
                 if (isAdmin) {
-                    response.sendRedirect(request.getContextPath() + "/admin/dashboard.jsp");
+                    response.sendRedirect(request.getContextPath() + "/admin/Dashboard");
                 } else {
-                    response.sendRedirect(request.getContextPath() + "/index.jsp");
+                    response.sendRedirect(request.getContextPath() + "/home");
                 }
             } else {
-                // Credenziali errate
+
                 request.setAttribute("errorMessage", "Email o password errati.");
                 request.getRequestDispatcher("/login.jsp").forward(request, response);
             }
@@ -60,9 +57,20 @@ public class LoginServlet extends HttpServlet {
         }
         }
 
-    // Se qualcuno prova ad accedere alla Servlet direttamente in GET, lo rimandiamo al form di login
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        String action = request.getParameter("action");
+
+        if ("logout".equals(action)) {
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                session.invalidate();
+            }
+            response.sendRedirect(request.getContextPath() + "/home");
+            return;
+        }
+
         response.sendRedirect(request.getContextPath() + "/login.jsp");
     }
 }

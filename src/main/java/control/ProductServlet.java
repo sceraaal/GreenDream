@@ -12,7 +12,6 @@ import model.Product;
 public class ProductServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    // Gestiamo sia GET che POST reindirizzando a un unico metodo interno per comodità
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         processRequest(request, response);
@@ -25,28 +24,38 @@ public class ProductServlet extends HttpServlet {
 
     private void processRequest(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        
+
         String action = request.getParameter("action");
-        
+
         try {
             dao.ProductDAO productDAO = new dao.ProductDAO();
 
             if (action == null || action.equals("list")) {
-                // 1. VISUALIZZAZIONE CATALOGO COMPLETO
-                request.setAttribute("products", productDAO.findAll());
+
+                String categoria = request.getParameter("categoria");
+
+                if (categoria != null && !categoria.trim().isEmpty() && !categoria.equals("tutti")) {
+                    request.setAttribute("products", productDAO.findByCategory(categoria));
+                } else {
+                    request.setAttribute("products", productDAO.findAll());
+                }
+
+                request.setAttribute("categoria", categoria);
+                request.setAttribute("titoloCatalogo", titoloPerCategoria(categoria));
+
                 request.getRequestDispatcher("/products.jsp").forward(request, response);
-                
+
             } else if (action.equals("detail")) {
-                // 2. VISUALIZZAZIONE DETTAGLIO PRODOTTO
+
                 String idStr = request.getParameter("id");
                 if (idStr != null) {
                     int id = Integer.parseInt(idStr);
                     request.setAttribute("product", productDAO.findById(id));
                 }
                 request.getRequestDispatcher("/productDetails.jsp").forward(request, response);
-                
+
             } else if (action.equals("insert")) {
-                // 3. INSERIMENTO NUOVO PRODOTTO (Solo Admin)
+
                 Product product = new Product();
                 product.setName(request.getParameter("name"));
                 product.setDescription(request.getParameter("description"));
@@ -54,13 +63,15 @@ public class ProductServlet extends HttpServlet {
                 product.setIva(Integer.parseInt(request.getParameter("iva")));
                 product.setQuantity(Integer.parseInt(request.getParameter("quantity")));
                 product.setImage(request.getParameter("image"));
-                
+                String cat = request.getParameter("category");
+                product.setCategory((cat == null || cat.trim().isEmpty()) ? "cane" : cat);
+
                 productDAO.save(product);
                 request.getSession().setAttribute("successMessage", "Prodotto inserito con successo!");
-                response.sendRedirect(request.getContextPath() + "/admin/manageProducts.jsp");
-                
+                response.sendRedirect(request.getContextPath() + "/admin/Dashboard");
+
             } else if (action.equals("update")) {
-                // 4. MODIFICA PRODOTTO ESISTENTE (Solo Admin)
+
                 Product product = new Product();
                 product.setId(Integer.parseInt(request.getParameter("id")));
                 product.setName(request.getParameter("name"));
@@ -69,24 +80,38 @@ public class ProductServlet extends HttpServlet {
                 product.setIva(Integer.parseInt(request.getParameter("iva")));
                 product.setQuantity(Integer.parseInt(request.getParameter("quantity")));
                 product.setImage(request.getParameter("image"));
-                
+                String cat = request.getParameter("category");
+                product.setCategory((cat == null || cat.trim().isEmpty()) ? "cane" : cat);
+
                 productDAO.update(product);
                 request.getSession().setAttribute("successMessage", "Prodotto modificato con successo!");
-                response.sendRedirect(request.getContextPath() + "/admin/manageProducts.jsp");
-                
+                response.sendRedirect(request.getContextPath() + "/admin/Dashboard");
+
             } else if (action.equals("delete")) {
-                // 5. CANCELLAZIONE PRODOTTO (Solo Admin)
+
                 String idStr = request.getParameter("id");
                 if (idStr != null) {
                     productDAO.delete(Integer.parseInt(idStr));
                 }
                 request.getSession().setAttribute("successMessage", "Prodotto eliminato correttamente.");
-                response.sendRedirect(request.getContextPath() + "/admin/manageProducts.jsp");
+                response.sendRedirect(request.getContextPath() + "/admin/Dashboard");
             }
 
         } catch (Exception e) {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private String titoloPerCategoria(String categoria) {
+        if (categoria == null || categoria.trim().isEmpty() || categoria.equals("tutti")) {
+            return "Tutti i nostri prodotti";
+        }
+        switch (categoria) {
+            case "cane":             return "Prodotti per il Cane";
+            case "gatto":            return "Prodotti per il Gatto";
+            case "piccoli-animali":  return "Prodotti per Piccoli Animali";
+            default:                 return "Tutti i nostri prodotti";
         }
     }
 }

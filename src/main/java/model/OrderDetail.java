@@ -5,7 +5,7 @@ import java.io.Serializable;
 public class OrderDetail implements Serializable 
 {
     private static final long serialVersionUID = 1L;
-    
+
     private int id;
     private int orderId;
     private int productId;

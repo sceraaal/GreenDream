@@ -15,7 +15,7 @@ public class OrderDetailDAO
     public void save(OrderDetail orderDetail) throws SQLException 
     {
         String query = "INSERT INTO order_details (order_id, product_id, historical_price, historical_iva, quantity) VALUES (?, ?, ?, ?, ?)";
-        
+
         try (Connection connection = DriverManagerConnectionPool.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) 
         {
@@ -24,7 +24,7 @@ public class OrderDetailDAO
             statement.setDouble(3, orderDetail.getHistoricalPrice());
             statement.setInt(4, orderDetail.getHistoricalIva());
             statement.setInt(5, orderDetail.getQuantity());
-            
+
             statement.executeUpdate();
         }
     }

@@ -36,7 +36,7 @@ public class Cart implements Serializable
     public void removeProduct(Product product) 
     {
         CartItem toRemove = null;
-        
+
         for (CartItem item : this.items) 
         {
             if (item.getProduct().getId() == product.getId()) 
@@ -45,7 +45,7 @@ public class Cart implements Serializable
                 break;
             }
         }
-        
+
         if (toRemove != null) 
         {
             this.items.remove(toRemove);
@@ -55,12 +55,12 @@ public class Cart implements Serializable
     public double getTotalPrice() 
     {
         double total = 0.0;
-        
+
         for (CartItem item : this.items) 
         {
             total = total + (item.getProduct().getPrice() * item.getQuantity());
         }
-        
+
         return total;
     }
 
