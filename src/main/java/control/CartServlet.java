@@ -13,54 +13,72 @@ import model.Cart;
 import model.Product;
 
 @WebServlet("/Cart")
-public class CartServlet extends HttpServlet {
+public class CartServlet extends HttpServlet 
+{
     private static final long serialVersionUID = 1L;
 
+    //Handles GET requests
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        processRequest(request, response);
-    }
-
+    	throws ServletException, IOException 
+    	{
+        	processRequest(request, response);
+    	}
+    //Handles POST requests
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        processRequest(request, response);
-    }
-
+    	throws ServletException, IOException 
+    	{
+        	processRequest(request, response);
+    	}
+    
+    //Centralized method that handles the logic regardless of the request type (GET or POST)
     private void processRequest(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        
+            throws ServletException, IOException 
+    {
+        //With 'true' if the session doesn't exist, it doesn't create a new one
         HttpSession session = request.getSession(true);
         
         Cart cart = (Cart) session.getAttribute("cart");
-        if (cart == null) {
-            cart = new Cart();
+        if (cart == null) 
+        {
+            cart = new Cart(); //If the cart doesn't exist, a new one will be created
             session.setAttribute("cart", cart);
         }
-
+        
+        //We retrieve the user's request
         String action = request.getParameter("action");
         String idStr = request.getParameter("id");
 
-        try {
+        try 
+        {
             ProductDAO productDAO = new ProductDAO();
-
-            if (action == null || action.equals("view")) {
+            //if the action is null or is just view, then we return to the jsp page 
+            //and will show the user only the graphic content of the cart
+            if (action == null || action.equals("view")) 
+            {
                 request.getRequestDispatcher("/cart.jsp").forward(request, response);
                 return;
             }
-
-            if (idStr != null && !idStr.trim().isEmpty()) {
-                int id = Integer.parseInt(idStr);
+            
+            if (idStr != null && !idStr.trim().isEmpty()) 
+            {
+                int id = Integer.parseInt(idStr); 
                 Product product = productDAO.findById(id);
 
-                if (product != null) {
-                    if (action.equals("add")) {
+                if (product != null) 
+                {
+                    if (action.equals("add")) 
+                    {
                         cart.addProduct(product);
                         
-                    } else if (action.equals("update")) {
+                    } 
+                    else if (action.equals("update")) 
+                    {
                         int quantity = Integer.parseInt(request.getParameter("quantity"));
                         cart.updateProductQuantity(product, quantity);
                         
-                    } else if (action.equals("remove")) {
+                    } 
+                    else if (action.equals("remove")) 
+                    {
                         cart.removeProduct(product);
                     }
                 }
@@ -68,7 +86,9 @@ public class CartServlet extends HttpServlet {
 
             response.sendRedirect(request.getContextPath() + "/cart.jsp");
 
-        } catch (Exception e) {
+        } 
+        catch (Exception e) 
+        {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }

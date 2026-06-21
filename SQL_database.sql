@@ -2,7 +2,7 @@ CREATE DATABASE IF NOT EXISTS petshop_db;
 USE petshop_db;
 
 SET FOREIGN_KEY_CHECKS = 0;
-DROP TABLE IF EXISTS order_items;
+DROP TABLE IF EXISTS order_details;
 DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS cart;
 DROP TABLE IF EXISTS products;
@@ -27,15 +27,16 @@ CREATE TABLE products (
     name VARCHAR(100) NOT NULL,
     description TEXT,
     price DECIMAL(10, 2) NOT NULL,
-    stock INT NOT NULL DEFAULT 0,
-    image_url VARCHAR(255) DEFAULT 'images/logo.png'
+    iva INT NOT NULL DEFAULT 22,
+    quantity INT NOT NULL DEFAULT 0,
+    image VARCHAR(255) DEFAULT 'images/logo.png'
 );
 
-INSERT INTO products (name, description, price, stock, image_url) VALUES 
-('Royal Canin Dry Food', 'Premium dry food for adult dogs', 45.90, 20, 'images/royal_canin.png'),
-('Almo Nature Wet Food', 'Premium wet food for cats chicken flavor', 2.50, 100, 'images/almo.png'),
-('Seresto Flea Collar', 'Flea and tick collar for cats and dogs', 32.00, 15, 'images/seresto.png'),
-('Cat Scratching Post', 'Cardboard scratching post with catnip included', 12.99, 8, 'images/scratcher.png');
+INSERT INTO products (name, description, price, iva, quantity, image) VALUES 
+('Royal Canin Dry Food', 'Premium dry food for adult dogs', 45.90, 22, 20, 'images/royal_canin.png'),
+('Almo Nature Wet Food', 'Premium wet food for cats chicken flavor', 2.50, 22, 100, 'images/almo.png'),
+('Seresto Flea Collar', 'Flea and tick collar for cats and dogs', 32.00, 22, 15, 'images/seresto.png'),
+('Cat Scratching Post', 'Cardboard scratching post with catnip included', 12.99, 22, 8, 'images/scratcher.png');
 
 CREATE TABLE cart (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -50,17 +51,18 @@ CREATE TABLE orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    total_amount DECIMAL(10, 2) NOT NULL,
+    total DECIMAL(10, 2) NOT NULL,
     status VARCHAR(20) DEFAULT 'Processing',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE order_items (
+CREATE TABLE order_details (
     id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT NOT NULL,
     product_id INT NOT NULL,
     quantity INT NOT NULL,
-    price_at_purchase DECIMAL(10, 2) NOT NULL,
+    historical_price DECIMAL(10, 2) NOT NULL,
+    historical_iva INT NOT NULL DEFAULT 22,
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );

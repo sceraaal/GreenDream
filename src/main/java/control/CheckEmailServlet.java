@@ -7,28 +7,34 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-// Mappiamo la servlet per la chiamata AJAX
-@WebServlet("/CheckEmail")
-public class CheckEmailServlet extends HttpServlet {
+//Let's map the servlet for the AJAX call
+@WebServlet("/CheckEmailServlet")
+public class CheckEmailServlet extends HttpServlet 
+{
     private static final long serialVersionUID = 1L;
 
-    // Usiamo il doGet perché è una semplice richiesta di controllo lettura dati
+ // We use doGet because it's a simple data reading control request.
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
+            throws ServletException, IOException 
+    {
         
         String email = request.getParameter("email");
         boolean exists = false;
 
-        if (email != null && !email.trim().isEmpty()) {
-            try {
+        if (email != null && !email.trim().isEmpty()) 
+        {
+            try 
+            {
                 dao.UserDAO userDAO = new dao.UserDAO();
                 exists = userDAO.checkEmailExists(email);
-            } catch (Exception e) {
+            } 
+            catch (Exception e) 
+            {
                 e.printStackTrace();
             }
         }
 
-        // Impostiamo il tipo di risposta come JSON (richiesto da checklist)
+     // Set the response type to JSON 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 

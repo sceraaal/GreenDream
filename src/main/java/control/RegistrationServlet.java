@@ -25,7 +25,7 @@ public class RegistrationServlet extends HttpServlet {
             nome.isEmpty() || cognome.isEmpty() || email.isEmpty() || password.isEmpty()) {
             
             request.setAttribute("errorMessage", "Tutti i campi sono obbligatori.");
-            request.getRequestDispatcher("/registration.jsp").forward(request, response);
+            request.getRequestDispatcher("/register.jsp").forward(request, response);
             return;
         }
 
@@ -59,6 +59,6 @@ public class RegistrationServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         // Blocco di sicurezza: se provano ad accedere in GET, rimandiamo alla pagina del form
-        response.sendRedirect(request.getContextPath() + "/registration.jsp");
+        response.sendRedirect(request.getContextPath() + "/register.jsp");
     }
 }

@@ -21,22 +21,26 @@ import model.Product;
 import model.User;
 
 @WebServlet("/Checkout")
-public class CheckoutServlet extends HttpServlet {
+public class CheckoutServlet extends HttpServlet 
+{
     private static final long serialVersionUID = 1L;
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
+            throws ServletException, IOException 
+    {
         
         HttpSession session = request.getSession(false);
         
         // Controllo di sicurezza: se non c'è la sessione, rimandiamo alla home
-        if (session == null) {
+        if (session == null) 
+        {
             response.sendRedirect(request.getContextPath() + "/index.jsp");
             return;
         }
 
         User user = (User) session.getAttribute("user");
-        if (user == null) {
+        if (user == null) 
+        {
             response.sendRedirect(request.getContextPath() + "/login.jsp");
             return;
         }
@@ -44,13 +48,15 @@ public class CheckoutServlet extends HttpServlet {
         Cart cart = (Cart) session.getAttribute("cart");
 
         // Verifichiamo se il carrello esiste ed ha almeno un prodotto
-        if (cart == null || cart.getItems().isEmpty()) {
+        if (cart == null || cart.getItems().isEmpty()) 
+        {
             request.setAttribute("errorMessage", "Il tuo carrello è vuoto. Impossibile completare l'ordine.");
             request.getRequestDispatcher("/cart.jsp").forward(request, response);
             return;
         }
 
-        try {
+        try 
+        {
             OrderDAO orderDAO = new OrderDAO();
             OrderDetailDAO orderDetailDAO = new OrderDetailDAO();
             ProductDAO productDAO = new ProductDAO();
@@ -63,9 +69,11 @@ public class CheckoutServlet extends HttpServlet {
 
             int orderId = orderDAO.save(order);
 
-            if (orderId > 0) {
+            if (orderId > 0) 
+            {
                 // Salvataggio dei dettagli dell'ordine e aggiornamento magazzino
-                for (CartItem item : cart.getItems()) {
+                for (CartItem item : cart.getItems()) 
+                {
                     Product product = item.getProduct();
                     
                     // Salviamo il dettaglio dell'ordine
@@ -80,9 +88,11 @@ public class CheckoutServlet extends HttpServlet {
 
                     // Aggiorniamo la quantità nel DB
                     Product dbProduct = productDAO.findById(product.getId());
-                    if (dbProduct != null) {
+                    if (dbProduct != null) 
+                    {
                         int newQuantity = dbProduct.getQuantity() - item.getQuantity();
-                        if (newQuantity < 0) {
+                        if (newQuantity < 0) 
+                        {
                             newQuantity = 0; // Evitiamo quantità negative a magazzino
                         }
                         dbProduct.setQuantity(newQuantity);
@@ -98,12 +108,16 @@ public class CheckoutServlet extends HttpServlet {
                 
                 // Reindirizziamo alla pagina di conferma dell'ordine
                 response.sendRedirect(request.getContextPath() + "/orderConfirmation.jsp");
-            } else {
+            } 
+            else 
+            {
                 request.setAttribute("errorMessage", "Errore nel salvataggio dell'ordine.");
                 request.getRequestDispatcher("/checkout.jsp").forward(request, response);
             }
 
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e) 
+        {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }

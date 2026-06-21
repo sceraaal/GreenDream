@@ -8,7 +8,7 @@
               maxIdle="10"
               maxWaitMillis="-1"
               username="root"
-              password="LA_TUA_PASSWORD da cambiare" 
+              password="Lucia123." 
               driverClassName="com.mysql.cj.jdbc.Driver"
-              url="jdbc:mysql://localhost:3306/NOME_DEL_TUO_DB da cambiare ?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=UTC"/> 
+              url="jdbc:mysql://localhost:3306/petshop_db?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=UTC"/> 
 </Context>
